@@ -186,10 +186,24 @@ def parse_nexus(nexus):
 
 def parse_text(textfile):
     tips_list = []
+    if ".fasta" in textfile:
+        tips_list = parse_fasta(textfile)
+        return tips_list
     with open (textfile) as text:
         for line in text:
             line = line.strip()
             tips_list.append(line)
+    return tips_list
+
+def parse_fasta(textfile):
+    tips_list = []
+    with open (textfile) as text:
+        for line in text:
+            if ">" in line:
+                line = line.strip()
+                line = line.strip(">")
+                tips_list.append(line)
+    #print(tips_list)
     return tips_list
 
    

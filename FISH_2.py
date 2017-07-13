@@ -1,7 +1,8 @@
 #!/usr/local/bin/python
 #this is a conglomerate of fasta-fixing scripts, now called FISH (FASTA ID SWAPPING HELPER) because lol i can acronym.
 ##
-#last edit abigailc@Actaeon Sept 7 2016
+#opened abigailc@Actaeon Sept 7 2016
+#edited abigailc@Actaeon July 12 2017
 
 #things this doesn't do: play super nice with accession numbers instead of GI numbers. probably easy to convert, (see that one script that one time), but meh
 #do it later.
@@ -24,6 +25,7 @@ class Fasta:
         self.original_ids = []
         self.original_seqs = []
         self.species_names = []
+        self.genus_species_only = []
         #numbers is either gi numbers or accession numbers depending on input. NOT taxid numbers
         self.numbers = []
         self.gis_list = []
@@ -103,21 +105,25 @@ class Fasta:
         self.species_names = speclist
         return speclist
 
+    def gen_genus_species_only_lists(self):
+        self.genus_species_only = []
+        if self.species_names == []:
+            self.gen_species_lists()
+        for item in self.species_names:
+            bits = item.split("_")
+            if len(bits) > 1:
+                genus = bits[0]
+                species = bits[1]
+                final = genus+"_"+species
+            else:
+                final = item
+            self.genus_species_only.append(final)
 
-        #OLD VERSION
-        # self.species_names = []
-        # speclist = []
-        # for item in self.ids:
-        #         taxon = re.sub("([^_]*)(Candidatus_)([A-Z][a-z]*_[a-z]*)(.*)", "\\3", item)
-        #     elif "uncultured_" in item:
-        #         taxon = re.sub("([^_]*)(uncultured_)([A-Z][a-z]*_[a-z]*)(.*)", "\\3", item)
-        #     else:
-        #         taxon = re.sub("([^_]*)([A-Z][a-z]*_[a-z]*)(.*)", "\\2", item)
-        #     if "#" in taxon:
-        #         print ("TAXON error in gen_species_lists():" + taxon)
-        #     speclist.append(taxon)
-        #     self.species_names.append(taxon)
-        # return speclist
+    def swap_id_for_genus_species_only(self):
+        if self.genus_species_only == []:
+            self.gen_genus_species_only_lists()
+        self.ids = self.genus_species_only
+
     def common_shorten(self, verbose = False):
         #TODO: allow input of manual shorten-pairs, possibly in new function
         #put your conversions of common strings to shorten here
@@ -1213,7 +1219,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--tenchars", action = "store_true", help="Flag turns sequence IDs into ten character strings")
     parser.add_argument("-ba", "--bayes", action = "store_true", help="Flag turns sequences into form that will work as MrBayes input")
     parser.add_argument("-p", "--piece", default = False, action = "store", help="Provide taxonomy-depth, gi, or combo for shortening eg \"1 3 gi\"")
-
+    parser.add_argument("-ns", "--no_strain", default = False, action = "store_true", help = "Toggle replaces seqIDs with just genus_species. use with -wf or -wn")
     #writing methods
     parser.add_argument("-wf", "--writefasta", action = "store", default=False, help="Provide name for new fasta file")
     parser.add_argument("-wn", "--writenewick", action = "store", default=False, help="Provide name of newick, name of newfile eg \"example.newick replaced.newick\"")
@@ -1308,6 +1314,10 @@ if __name__ == "__main__":
         MyFasta.revert_cara_key(args.keycara)
     if args.ncbicdd != False:
         MyFasta.ncbi_cdd(args.ncbicdd)
+    if args.no_strain != False:
+        MyFasta.gen_genus_species_only_lists()
+        MyFasta.swap_id_for_genus_species_only()
+
     #write stuff
     if args.writefasta != False:
         MyFasta.gen_new_fasta(args.writefasta)

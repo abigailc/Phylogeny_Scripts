@@ -524,8 +524,12 @@ class Fasta:
         print(self.ids)
         #done
         #troubleshooting: do not preform this operation after any that change self.ids. this op must be done first, or in a seperate command.
+
+    #this should be used to read-in a key of original name (same as in fasta/newick) : new names.
+    #populate only ids, based on position of original_id
     def Read_Spreadsheet_File(self, spreadsheet_file):
         #print(spreadsheet_file)
+        print(self.original_ids)
         workbook = xlrd.open_workbook(spreadsheet_file)
         worksheet = workbook.sheet_by_index(0)
        # print(worksheet)
@@ -539,46 +543,34 @@ class Fasta:
         #naming dict will contain an original name (key) and new name (value)
         while empty_original_name is False:
             try:
-                a = worksheet.cell(row, column).value
-                if type(a) is float:
-                    #print(a)
-                    a = repr(a).split(".")[0]
-                    #print(a)
+                a = worksheet.cell(row, 0).value
+                b = worksheet.cell(row, 1).value
                 row+=1
-                if a == "":
-                    empty_original_name = True
-                    continue
                 original_name.append(str(a))
+                new_name.append(str(b))
             except:
                 empty_original_name = True
-        column +=1
-        row = 0
-        while empty_new_name is False:
-            try:
-                a = str(worksheet.cell(row, column).value)
-                if a == "":
-                    empty_new_name =True
-                    continue
-                a = re.sub("[\(\)]", "", a)
-#                a = re.sub("[ .:\(\)\-,]", "_", a)
-                a = re.sub("__", "_", a)
-                new_name.append(str(a))
-                row+=1
-            except:
-                empty_new_name = True
-        for item in new_name:
-            self.ids.append(item)
-        for item in original_name:
-            if item == "":
-                print("ooooo")
-                continue
-            self.original_ids.append(item)
+        
+        #correlate them properly
+        for x in range(len(self.original_ids)):
+            #look for original id match
+            o_id = self.original_ids[x]
+            for y in range(len(original_name)):
+                n_id = original_name[y]
+                n_id = n_id.strip()
+                o_id = o_id.strip()
+                #if match, load new_name as replacement in correct index
+                if o_id == n_id:
+                    new_id_name = new_name[y]
+                    self.ids[x] = new_id_name.strip()
+        #print check
         print("original names:")
         print(self.original_ids)
+        print(len(self.original_ids))
         print("new names:")
         print(self.ids)
-        self.original_ids = original_name
-        self.ids = new_name
+        print(len(self.ids))
+
         
     def one_per_species(self):
         print("beginning one per species subsampling")

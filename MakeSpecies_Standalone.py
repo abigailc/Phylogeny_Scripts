@@ -106,6 +106,7 @@ class Fasta:
         try:
             with open(fastaname) as fastafile:
                 for line in fastafile:
+                    
                     if "\n" == line:
                         pass
                     if ">" in line:

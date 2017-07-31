@@ -34,17 +34,17 @@ def musrax_on_cluster(filename, scriptname):
     raxl = outname.split(".")
     raxn = raxl[0]
     raxoutname = "RAxML_bipartitions."+raxn
-
     #make dir on cluster if need be
     check_directory_existance(ssh_inst)
     #artefact
     clus_path = "/MusRax"
     #make the script
     a = gen_musrax_script(scriptname, filename, outname, raxn)
+    #a = name of script
     #current dir
     direct = os.getcwd()
 
-    os.system("scp "+clus_head[:-1]+clus_path+"/"+outname+" "+direct)
+    #os.system("scp "+clus_head[:-1]+clus_path+"/"+outname+" "+direct)
     #move files to cluster
     move_to_cluster([filename,a], clus_path)
     #submit the .sh file on the cluster

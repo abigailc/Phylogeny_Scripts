@@ -3,33 +3,18 @@
 # last edit abigailc@Actaeon on october 21 2016
 
 
-#major speed increase... first run should take 2-4 hours, subsequent runs from same directory ~1 hour.
-#usage
-#assume you want to use species that are found in the single_gene_fasta file example.fasta, and genes as found in Euk_Ribo.fasta
-#always use -r flag for now, it is faster.
-#if you want to use species from a list file (one species per line) use -s SPECIESFILE instead of -f FASTAFILE
-# $python MakesSpeciesTrees.py -f example.fasta -g Euk_Ribo.fasta -p MyTree1 -r
-
+#so the progress bar works
 from __future__ import print_function
-
-##SET
-names_file = "/Users/abigailc/Documents/Taxonomy_Stuff/taxdump/names.dmp"
-nodes_file = "/Users/abigailc/Documents/Taxonomy_Stuff/taxdump/nodes.dmp"
-
-
 
 ######### PERSONAL_SETTINGS #########
 ssh_inst = "ssh -l abigailc -i ~/.ssh/id_rsa eofe4.mit.edu"
 clus_head = "abigailc@eofe4.mit.edu:/home/abigailc/"
-Path_Blast = "/Users/abigailc/blast/"
 New_Gene_List = "/Users/abigailc/Documents/TestForDani/Newest_Ribo.fasta"
 
+#might need to be set if you have a nonstandard blast install and are running a full download (not just using my rpovided database)
+Path_Blast = "/Users/abigailc/blast/"
 
 #if running elsewhere there MIGHT be issues.
-
-
-
-
 #from Parse_Taxonomy import *
 from Classes_Standalone import *
 
@@ -43,10 +28,7 @@ import time
 import subprocess
     
 from xml.dom import minidom
-try:
-    import urllib2
-except:
-    pass
+import urllib2
 
 # #to use this script, you need to do several things.
 # 1. set the ssh path so you will be able to run things on the cluster.
@@ -55,7 +37,7 @@ except:
 # a. cd to directory you are keeping this script.
 # b. identify the genes you want your species tree to be built from, and create a .fasta file containing them. For ease of understanding some produced files, I am using the sequence id convention
 # >GeneName|other_sequence_information_blah_blah
-# You can use the files I have here (Archaeal_Ribo.fasta, Bacterial_Ribo.fasta, Eukaryal_Ribo.fasta) or create your own query file. Please provide the full path to the query file, or keep it in the same folder as the directory you indicate when calling MakeSpeciesTree.
+#current set is for gene_name to be exactly 4 characters.
 # indicate the gene-queries to use with the -genes tag.
 # c.  identify the species that should be included in your species tree. They should either be in a shorten-formatted .fasta file, or in a plaintext file with one species name on each line of the file eg.
 # Cat
@@ -202,7 +184,7 @@ class Fasta:
                     print(species_name)
                     continue
 
-                species_name = re.sub("[\[\]:;=,/\+'\.\-\(\)", "_", species_name)
+                species_name = re.sub("[\[\]:;=,/\+'\.\-\(\)]", "_", species_name)
                 species_name = re.sub(" ", "_", species_name)
                 species_name = re.sub("__", "_", species_name)
                 species_name = re.sub("__", "_", species_name)
@@ -541,7 +523,7 @@ class Fasta:
                 inf.write(self.ids[i] + "\n")
         print("Info file was generated. Named " + info_file_name)
         # done
-# this ought to be deleted - but needs to be tested... hopefully it is identicle to the version in Classes_Standalone
+    # this ought to be deleted - but needs to be tested... hopefully it is identicle to the version in Classes_Standalone
     def gen_species_lists(self):
         speclist = []
         for item in self.ids:
@@ -2206,7 +2188,7 @@ if __name__ == "__main__":
     #optional directory
     parser.add_argument("directory", nargs='?', default=os.getcwd(), type=str, help="type name of directory to run in eg MakeSpeciesTree")
     parser.add_argument("-p", "--projectname", action = "store", help="type projectname eg SOD8")
-    parser.add_argument("-f", "--fasta", action = "store", help="type fasta eg SOD.fasta")
+    parser.add_argument("-f", "--file", action = "store", help="type file with constraining species names eg SOD.fasta or SOD.txt")
     parser.add_argument("-b", "--blastmissing", action = "store_true", default = False, help="type -b to preform a blast to search for any sequence data that is missing, in case it is available on NCBI but was missing or badly formatted in the original search.")
     parser.add_argument("-s", "--strain", action = "store_true", default = False, help="type -s to ignore strains -- that is, only consider genus_species when building the tree. no subspecies or strains")
    
@@ -2217,7 +2199,7 @@ if __name__ == "__main__":
     if args.projectname is False:
         print("...specificity?")
         raise SystemExit
-    set_up_an_independent_run(args.fasta, args.projectname, args.directory, args.blastmissing, args.strain)
+    set_up_an_independent_run(args.file, args.projectname, args.directory, args.blastmissing, args.strain)
 
 
 #strain... set as argument, passed to 1, 2, 5, 12(GET SEQUENCES)

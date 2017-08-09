@@ -160,12 +160,14 @@ if __name__ == "__main__":
     import re
     import time
     parser = argparse.ArgumentParser(description="All")
-    parser.add_argument("-n", "--name", action = "store", default = "Unnamed_Job", help="give a name for your script/job")
-    parser.add_argument("-f", "--folder", action = "store", default = False, help="give a folder name. folder should be in same file as this script. should contain only .fasta files.")
+    parser.add_argument("-p", "--projectname", action = "store", default = "Unnamed_Job", help="give a name for your script/job")
+    parser.add_argument("-f", "--folder", action = "store", default = False, help="give a folder name. should contain ONLY .fasta files.")
     parser.add_argument("-ss", "--shorten_species", action = "store_true", default = False, help = "toggles FISH-2 shortening and subsampling one per species")
     parser.add_argument("-sg", "--shorten_genus", action = "store_true", default = False, help = "toggles FISH-2 shortening and subsampling one per genus")
     parser.add_argument("-so", "--shorten_only", action = "store_true", default = False, help = "only shortens, doesn't run on cluster ")
-
+    parser.add_argument("-ns", "--no_shorten", action = "store_true", default = False, help = "only runs on cluster, no shortening ")
+    parser.add_argument("-aa", "--aa_model", action = "store_true", default = False, help = "specify model if you hate PROTGAMMALGF ")
+  
     
     args = parser.parse_args()
     #create input file list
@@ -211,7 +213,9 @@ if __name__ == "__main__":
         print(Input_List)
         print("Your files have been shortened but not subsampled or sent to the cluster")
         raise SystemExit
-    if args.shorten_species is True:
+    if args.no_shorten is True:
+        pass
+    elif args.shorten_species is True:
         fish_out_list = []
         for item in Input_List:
             #item = x.fasta
@@ -266,7 +270,7 @@ if __name__ == "__main__":
     else:
         AA_MODEL = "PROTGAMMALGF"
     #run the thing
-    musrax_array_on_cluster(Input_List, args.name, AA_MODEL)
+    musrax_array_on_cluster(Input_List, args.projectname, AA_MODEL)
     print("done")
 
 

@@ -105,7 +105,7 @@ class Fasta:
                     keep_seq.append(seq)
                     success += 1
         if suc_num == success:
-            print("100% complete extract")
+            print("100 percent complete extract")
         else:
             print(str(success)+"out of "+str(suc_num)+" sequences extracted")
         self.ids = keep_ids
@@ -133,6 +133,27 @@ class Fasta:
             print(str(success)+" sequences extracted")
         self.ids = keep_ids
         self.seqs = keep_seq
+    def seperate(self, fasta_OUTNAME):
+        new_sep_fasta_name = "NOT_"+fasta_OUTNAME
+        list_old_only_indices = []
+        for i in range(len(self.original_ids)):
+            orig = self.original_ids[i]
+            if orig in self.ids:
+                pass
+            else:
+                list_old_only_indices.append[i]
+        SEP_IDS = []
+        SEP_SEQS = []
+        for item in list_old_only_indices:
+            #item will be an index
+            seq = self.original_seqs[i]
+            seqid = self.original_ids[i]
+            SEP_SEQS.append(seq)
+            SEP_IDS.append(seqid)
+        self.ids = SEP_IDS
+        self.seqs = SEP_SEQS
+        gen_new_fasta(self, new_sep_fasta_name)
+        return new_sep_fasta_name
     
 
 
@@ -206,6 +227,10 @@ def parse_fasta(textfile):
     #print(tips_list)
     return tips_list
 
+
+
+
+
    
 if __name__ == "__main__":
 
@@ -217,13 +242,14 @@ if __name__ == "__main__":
     parser.add_argument("-fas", "--fasta", action = "store", default = False, help="type the name of your .fasta file (")
     #what to extract
     parser.add_argument("-nex", "--nexus", action = "store", default = False, help="type name of nexus constraining file")
-    parser.add_argument("-txt", "--txtfile", action = "store", default = False, help="type name of text file containing constraining seqids or strings on seperate lines")
+    parser.add_argument("-txt", "--txtfile", action = "store", default = False, help="type name of text file containing constraining seqids or strings on seperate lines, or fasta file")
     parser.add_argument("-man", "--manual_input", action="store", default= False, help="type string for constraining")
     #flags
     parser.add_argument("-ex", "--exact", action = "store_true", default = False, help="toggle for exact seqid matching")
     parser.add_argument("-sub", "--substring", action="store_true", default= False, help="toggle for substring matching")
     #output
     parser.add_argument("-wf", "--write_fasta", action="store", default= False, help="give a name for the output file")
+    parser.add_argument("-sep", "--seperate", action="store_true", default= False, help="toggle to save non-selected sequences in seperate file. in devo")
 
     args = parser.parse_args()
 
@@ -261,7 +287,11 @@ if __name__ == "__main__":
         raise SystemExit
     else:
         myfasta.gen_new_fasta(args.write_fasta)
-    print("All done! hopefully! your output file is at: "+args.write_fasta)
+        print("your extracted output file is at: "+args.write_fasta)
+    if args.seperate is True:
+        a = myfasta.seperate(fasta_OUTNAME)
+        print("your seperated output file is at: "+a)
+    print("All done! hopefully!")
 
 
 
